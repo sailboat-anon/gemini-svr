@@ -1,25 +1,30 @@
 <?php
-/*
- * Gemini server written in PHP by seven@0xm.net
- * Version 0.1, Oct 2020
-*/
+$config = array([
+	'logging'		=>	true,
+	'log_file' 	=>	'logs/server.log',
+	'log_sep' 	=>	'\t',
+	'cert_file'	=> 	'certs/sailboat-anon.space',
+	'cert_pass' 	=> 	'password',
+	'local_ip' 	=> 	'127.0.0.1',
+	'local_port'	=> 	'1965',
+	'hosted_sites_dir' 		=> 'hosts/',
+	'default_dir'				=>	'hosts/gemini-web-svcs/',
+	'acceptable_index_files'	=>	array('index.gemini', 'index.gmi'),
 
-if(!require("config.php"))
-	die("config.php is missing.  Copy config.php.sample to config.php and customise your settings");
-require("gemini.class.php");
-$g = new Gemini($config);
+]);
+
+if(empty($config['cert_file'])) die("> Missing cert {$config['cert_file']} \n");
+if(!is_readable($config['cert_file']))die("> Cert is unreadable: {$config['cert_file']} \n");
 
 $context = stream_context_create();
 
-stream_context_set_option($context, 'ssl', 'local_cert', $g->certificate_file);
-stream_context_set_option($context, 'ssl', 'passphrase', $g->certificate_passphrase);
+stream_context_set_option($context, 'ssl', 'local_cert', $config['cert_file']);
+stream_context_set_option($context, 'ssl', 'passphrase', $config['cert_pass']);
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 stream_context_set_option($context, 'ssl', 'verify_peer', false);
 
-$socket = stream_socket_server("tcp://{$g->ip}:{$g->port}", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-
+$socket = stream_socket_server("tcp://{$config['local_ip']}:{$config['local_port']}", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 stream_socket_enable_crypto($socket, false);
-
 // apply patch from @nervuri:matrix.org to stop supporting out of spec versions of TLS
 $cryptoMethod = STREAM_CRYPTO_METHOD_TLS_SERVER
 	& ~ STREAM_CRYPTO_METHOD_TLSv1_0_SERVER
@@ -33,17 +38,16 @@ while(true) {
 	$line = fread($forkedSocket, 1024);
 	stream_set_blocking($forkedSocket, false);
 
-	$parsed_url = $g->parse_request($line);
+	$parsed_url = parse_request($line);
+	$filepath = get_filepath($parsed_url);
 
-	$filepath = $g->get_filepath($parsed_url);
-
-	$status_code = $g->get_status_code($filepath);
+	$status_code = get_status_code($filepath);
 
 	$meta = "";
 	$filesize = 0;
 
 	if($status_code == "20") {
-		$meta = $g->get_mime_type($filepath);
+		$meta = get_mime_type($filepath);
 		$content = file_get_contents($filepath);	
 		$filesize = filesize($filepath);
 	} else {
@@ -63,4 +67,61 @@ while(true) {
 	fclose($forkedSocket);
 }
 
-?>
+function parse_request($request) {
+	$url = trim($request); // <CR><LF> 
+	return parse_url($url);
+}
+
+function get_valid_hosts() {
+	global $config;
+	$dirs = array_map('basename', glob($config['hosted_sites_dir'].'*', GLOB_ONLYDIR));
+	return $dirs;
+}
+
+function get_status_code($filepath) {
+	if(is_file($filepath) and file_exists($filepath)) return '20';
+	if(!file_exists($filepath)) return '51';
+	return '50';
+}
+
+function get_mime_type($filepath) {
+	$type = mime_content_type($filepath);
+	// detect gemini file type
+	// so.. if it ends with gemini (or if it has no extension), assume
+	$path_parts = pathinfo($filepath);
+	if(empty($path_parts['extension']) or $path_parts['extension'] == "gemini") $type = "text/gemini"; // add .gmi
+	return $type;
+}
+
+function get_filepath($url) {
+	global $config;
+	$hostname = "";
+	if(!is_array($url))	return false;
+	if(!empty($url['host'])) $hostname = $url['host'];
+	$valid_hosts = get_valid_hosts();
+	if(!in_array($hostname, $valid_hosts))
+		$hostname = "default";
+
+	$url['path'] = str_replace(array("..", "__"), "", $url['path']);
+	// force an index file to be appended if a filename is missing
+	if(empty($url['path'])) {
+		$url['path'] = "/".($config['acceptable_index_files'][0]);
+	} elseif(substr($url['path'], -1) == "/") {
+   $url['path'] .= $config['acceptable_index_files'][0]; // extend later
+}
+$valid_data_dir = dirname(__FILE__)."/".($config['hosted_sites_dir']);
+$return_path = ($config['hosted_sites_dir']).$hostname.$url['path'];
+// check the real path is in the data_dir (path traversal sanity check)
+if(substr(realpath($return_path),0, strlen($valid_data_dir)) == $valid_data_dir) {
+   return $return_path;
+   }
+   return false;
+}
+
+function log_to_file($ip, $status_code, $meta, $filepath, $filesize) {
+	$ts = date("Y-m-d H:i:s", strtotime('now'));
+	$this->log_sep;
+	$str = $ts.$this->log_sep.$ip.$this->log_sep.$status_code.$this->log_sep.
+	$meta.$this->log_sep.$filepath.$this->log_sep.$filesize."\n";
+	file_put_contents($this->log_file, $str, FILE_APPEND);
+}
