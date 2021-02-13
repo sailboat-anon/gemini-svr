@@ -1,9 +1,4 @@
 FROM php:8.0.2-cli-alpine
-RUN sudo apt install git
-RUN git pull git://
-
-COPY server.php /server.php
-COPY var/lib/bind/* /var/lib/bind/
-COPY var/log/bind/* /var/log/bind/
-COPY etc/bind/zones/* /etc/bind/zones/
-RUN ["named", "-g", "-p", "53"]
+RUN apk add git
+RUN git clone git://github.com/sailboat-anon/gemini-svr.git
+RUN ["php", "/gemini-svr/gemini-svr.php", "password"]

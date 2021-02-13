@@ -13,7 +13,7 @@
 *	php gemini-svr.php <cert_password>
 */
 
-if ($argc < 1) { echo "> First argument must be the cert password\n"; }
+if ($argc < 2) { die("> First argument must be the cert password\n"); }
 $config = array(
 	'logging'		=>	true,
 	'log_file' 		=>	getcwd().'/logs/server.log',
@@ -27,12 +27,12 @@ $config = array(
 );
 
 if(empty($config['cert_file'])) die("> Missing cert {$config['cert_file']} \n");
-if(!is_readable($config['cert_file']))die("> Cert is unreadable: {$config['cert_file']} \n");
+if(!is_readable($config['cert_file'])) die("> Cert is unreadable: {$config['cert_file']} \n");
 //file_put_contents($config['log_file'], json_encode($config), FILE_APPEND); // debug mode only!
 
 $context = stream_context_create();
 stream_context_set_option($context, 'ssl', 'local_cert', $config['cert_file']);
-stream_context_set_option($context, 'ssl', 'passphrase', $argv[1]);
+stream_context_set_option($context, 'ssl', 'passphrase', $argv[2]);
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 stream_context_set_option($context, 'ssl', 'verify_peer', false);
 stream_context_set_option($context, 'ssl', 'cafile', $config['cert_file']);
