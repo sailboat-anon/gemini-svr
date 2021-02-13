@@ -1,5 +1,5 @@
-hosts/
 config.php
 install.txt
 cert.pem
 key.pem
+.DS_Store
