@@ -25,14 +25,14 @@ $config = array(
 	'default_dir'				=>	getcwd().'/hosts/sailboat-anon.space/',
 	'acceptable_index_files'	=>	array('index.gmi', 'index.gemini')
 );
-
+print_r($argv);
 if(empty($config['cert_file'])) die("> Missing cert {$config['cert_file']} \n");
 if(!is_readable($config['cert_file'])) die("> Cert is unreadable: {$config['cert_file']} \n");
 //file_put_contents($config['log_file'], json_encode($config), FILE_APPEND); // debug mode only!
 
 $context = stream_context_create();
 stream_context_set_option($context, 'ssl', 'local_cert', $config['cert_file']);
-stream_context_set_option($context, 'ssl', 'passphrase', $argv[2]);
+stream_context_set_option($context, 'ssl', 'passphrase', $argv[1]);
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 stream_context_set_option($context, 'ssl', 'verify_peer', false);
 stream_context_set_option($context, 'ssl', 'cafile', $config['cert_file']);
