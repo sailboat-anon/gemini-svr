@@ -1,6 +1,6 @@
 FROM php:8.0.2-cli-alpine
 RUN sudo apt install git
-RUN git pull 
+RUN git pull git://
 
 COPY server.php /server.php
 COPY var/lib/bind/* /var/lib/bind/

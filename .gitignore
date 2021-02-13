@@ -1,8 +1,9 @@
+.gitignore
 config.php
 install.txt
 cert.pem
 key.pem
 .DS_Store
-.gitignore
 infra.graphml
 config.php.dev
+Dockerfile
