@@ -1,14 +1,27 @@
 <?php
-// forked/refactored from https://coding.openguide.co.uk/git/gemini-php/
+/*
+*  
+*
+* forked/refactored from https://coding.openguide.co.uk/git/gemini-php/
+*
+* setup: 
+* 	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=yourdomain.space'
+* 	cp cert.pem certs/yourdomain.space.pem
+* 	cat key.pem >> certs/yourdomain.space.pem
+*
+* use:
+*	php gemini-svr.php <cert_password>
+*/
+
+if ($argc < 1) { echo "> First argument must be the cert password\n"; }
 $config = array(
 	'logging'		=>	true,
-	'log_file' 	=>	getcwd().'/logs/server.log',
-	'log_sep' 	=>	'|',
-	'cert_file'	=> 	getcwd().'/certs/sailboat-anon.space/combined.pem',
-	'cert_pass' 	=> 	'password',
-	'local_ip' 	=> 	'127.0.0.1',
+	'log_file' 		=>	getcwd().'/logs/server.log',
+	'log_sep' 		=>	'|',
+	'cert_file'		=> 	getcwd().'/certs/sailboat-anon.space/combined.pem',
+	'local_ip' 		=> 	'127.0.0.1',
 	'local_port'	=> 	'1965',
-	'hosted_sites_dir' 		=> getcwd().'/hosts/',
+	'hosted_sites_dir' 			=> getcwd().'/hosts/',
 	'default_dir'				=>	getcwd().'/hosts/sailboat-anon.space/',
 	'acceptable_index_files'	=>	array('index.gmi', 'index.gemini')
 );
@@ -19,7 +32,7 @@ if(!is_readable($config['cert_file']))die("> Cert is unreadable: {$config['cert_
 
 $context = stream_context_create();
 stream_context_set_option($context, 'ssl', 'local_cert', $config['cert_file']);
-stream_context_set_option($context, 'ssl', 'passphrase', $config['cert_pass']);
+stream_context_set_option($context, 'ssl', 'passphrase', $argv[1]);
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 stream_context_set_option($context, 'ssl', 'verify_peer', false);
 stream_context_set_option($context, 'ssl', 'cafile', $config['cert_file']);
@@ -30,7 +43,7 @@ while (true) {
 	$hsocket = stream_socket_accept($socket, '-1', $remote_ip); // -1 is 'daemon'
 	stream_set_blocking($hsocket, true);
 	stream_socket_enable_crypto($hsocket, true, STREAM_CRYPTO_METHOD_TLSv1_2_SERVER); // enforce TLS 1.2
-	// downgrade
+	// downgrade or restrict
 	/*$cryptoMethod = STREAM_CRYPTO_METHOD_TLS_SERVER
 		& ~ STREAM_CRYPTO_METHOD_TLSv1_0_SERVER
 		& ~ STREAM_CRYPTO_METHOD_TLSv1_1_SERVER;
