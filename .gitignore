@@ -3,3 +3,5 @@ install.txt
 cert.pem
 key.pem
 .DS_Store
+.gitignore
+infra.grapml
