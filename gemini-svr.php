@@ -16,9 +16,9 @@
 if ($argc < 2) { die("> First argument must be the cert password\n"); }
 $config = array(
 	'logging'		=>	true,
-	'log_file' 		=>	dirname(__FILE__) . '/logs/server.log',
+	'log_file' 		=>	'logs/server.log',
 	'log_sep' 		=>	'|',
-	'cert_file'		=> 	dirname(__FILE__) . 'certs/sailboat-anon.space/combined.pem',
+	'cert_file'		=> 	'certs/sailboat-anon.space/combined.pem',
 	'local_ip' 		=> 	'localhost',
 	'local_port'	=> 	'1965',
 	'hosted_sites_dir' 			=> getcwd().'/hosts/',
