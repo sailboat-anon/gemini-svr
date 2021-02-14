@@ -11,7 +11,18 @@ visit my capsule at gemini://sailboat-anon.space!
   - openssl
 ```
 
-## Install
+## Docker Install/Run (not tested)
+```
+git clone git://github.com/sailboat-anon/gemini-svr.git ; cd gemini-svr; nano Dockerfile
+configure the Dockerfile
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=yourdomain.space'
+cp cert.pem certs/yourdomain.space.pem
+cat key.pem >> certs/yourdomain.space.pem
+docker build -t gemini-svr .
+docker run -d -p 1965 --name=gemini-svr gemini-svr
+```
+
+## Standard Install
 ```
 git clone git://github.com/sailboat-anon/gemini-svr.git ; cd gemini-svr;
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=yourdomain.space'
