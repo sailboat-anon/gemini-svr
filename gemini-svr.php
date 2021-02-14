@@ -16,16 +16,16 @@
 if ($argc < 2) { die("> First argument must be the cert password\n"); }
 $config = array(
 	'logging'		=>	true,
-	'log_file' 		=>	'/gemini-svr/logs/server.log',
+	'log_file' 		=>	'logs/server.log',
 	'log_sep' 		=>	'|',
-	'cert_file'		=> 	'/gemini-svr/certs/sailboat-anon.space/combined.pem',
+	'cert_file'		=> 	'certs/sailboat-anon.space/combined.pem',
 	'local_ip' 		=> 	'localhost',
 	'local_port'	=> 	'1965',
-	'hosted_sites_dir' 			=> '/gemini-svr/hosts/',
-	'default_dir'				=> '/gemini-svr/hosts/sailboat-anon.space/',
+	'hosted_sites_dir' 			=> 'hosts/',
+	'default_dir'				=> 'hosts/sailboat-anon.space/',
 	'acceptable_index_files'	=>	array('index.gmi', 'index.gemini')
 );
-print_r($argv);
+
 if(empty($config['cert_file'])) die("> Missing cert {$config['cert_file']} \n");
 if(!is_readable($config['cert_file'])) die("> Cert is unreadable: {$config['cert_file']} \n");
 //file_put_contents($config['log_file'], json_encode($config), FILE_APPEND); // debug mode only!
