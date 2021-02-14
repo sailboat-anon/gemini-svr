@@ -1,7 +1,20 @@
-<?php
-/*
-*  
-*
+<?php 
+/* 
+* sailboat-anon | fairwinds! | https://github.com/sailboat-anon/gemini-svr | gemini://sailboat-anon.space
+* geminispace server | gemini-svr.php
+* 
+*                                  |
+*                                  |
+*                           |    __-__
+*                         __-__ /  | (
+*                        /  | ((   | |
+*                      /(   | ||___|_.  .|
+*                    .' |___|_|`---|-'.' (
+*               '-._/_| (   |\     |.'    \
+*                   '-._|.-.|-.    |'-.____'.
+*                       |------------------'
+*                        `----------------'   
+* 
 * forked/refactored from https://coding.openguide.co.uk/git/gemini-php/
 *
 * setup: 
@@ -12,19 +25,32 @@
 * use:
 *	php gemini-svr.php <cert_password>
 */
+echo <<<EOT
+                      _       _                             _           
+                     (_)     (_)                           | |          
+  __ _  ___ _ __ ___  _ _ __  _ ______ _____   ___ __ _ __ | |__  _ __  
+/  _` |/ _ \ '_ ` _ \| | '_ \| |______/ __\ \ / / '__| '_ \| '_ \| '_ \ 
+| (_| |  __/ | | | | | | | | | |      \__ <\ V /| |_ | |_) | | | | |_) |
+\__,  |\___|_| |_| |_|_|_| |_|_|      |___/ \_/ |_(_)| .__/|_| |_| .__/ 
+ __/  |        gemini://sailboat-anon.space          | |         | |    
+|___ /                                               |_|         |_|    
+
+
+EOT;
 
 if ($argc < 2) { die("> First argument must be the cert password\n"); }
 $config = array(
 	'logging'		=>	true,
-	'log_file' 		=>	'logs/server.log',
+	'log_file' 		=>	getcwd().'/logs/server.log',
 	'log_sep' 		=>	'|',
-	'cert_file'		=> 	'certs/sailboat-anon.space/combined.pem',
+	'cert_file'		=> 	getcwd().'/certs/sailboat-anon.space/combined.pem',
 	'local_ip' 		=> 	'localhost',
 	'local_port'	=> 	'1965',
-	'hosted_sites_dir' 			=> 'hosts/',
-	'default_dir'				=> 'hosts/sailboat-anon.space/',
+	'hosted_sites_dir' 			=> getcwd().'/hosts/',
+	'default_dir'				=> getcwd().'/hosts/sailboat-anon.space/',
 	'acceptable_index_files'	=>	array('index.gmi', 'index.gemini')
 );
+global $remote_ip;
 
 if(empty($config['cert_file'])) die("> Missing cert {$config['cert_file']} \n");
 if(!is_readable($config['cert_file'])) die("> Cert is unreadable: {$config['cert_file']} \n");
