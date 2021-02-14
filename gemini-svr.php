@@ -16,13 +16,13 @@
 if ($argc < 2) { die("> First argument must be the cert password\n"); }
 $config = array(
 	'logging'		=>	true,
-	'log_file' 		=>	'logs/server.log',
+	'log_file' 		=>	'/gemini-svr/logs/server.log',
 	'log_sep' 		=>	'|',
-	'cert_file'		=> 	'certs/sailboat-anon.space/combined.pem',
+	'cert_file'		=> 	'/gemini-svr/certs/sailboat-anon.space/combined.pem',
 	'local_ip' 		=> 	'localhost',
 	'local_port'	=> 	'1965',
-	'hosted_sites_dir' 			=> getcwd().'/hosts/',
-	'default_dir'				=>	getcwd().'/hosts/sailboat-anon.space/',
+	'hosted_sites_dir' 			=> '/gemini-svr/hosts/',
+	'default_dir'				=> '/gemini-svr/hosts/sailboat-anon.space/',
 	'acceptable_index_files'	=>	array('index.gmi', 'index.gemini')
 );
 print_r($argv);
